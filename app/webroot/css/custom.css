@@ -1,0 +1,96 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 26/06/2014, 17:12:12
+    Author     : Diego
+*/
+
+body .modal-admin {
+    /* new custom width */
+    width: 90%;
+    height: 80%;
+    /* must be half of the width, minus scrollbar on the left (30px) */
+    margin-left: -45%;
+}
+
+      /* Sticky footer styles
+      -------------------------------------------------- */
+
+      html,
+      body {
+        height: 100%;
+        /* The html and body elements cannot have any padding or margin. */
+      }
+
+      /* Wrapper for page content to push down footer */
+      #wrap {
+        min-height: 100%;
+        height: auto !important;
+        height: 100%;
+        /* Negative indent footer by it's height */
+        margin: 0 auto -60px;
+      }
+
+      /* Set the fixed height of the footer here */
+      #push,
+      #footer {
+        height: 60px;
+      }
+      #footer {
+        background-color: #f5f5f5;
+      }
+
+      /* Lastly, apply responsive CSS fixes as necessary */
+      @media (max-width: 767px) {
+        #footer {
+          margin-left: -20px;
+          margin-right: -20px;
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+      }
+
+
+
+      /* Custom page CSS
+      -------------------------------------------------- */
+      /* Not required for template or sticky footer method. */
+
+      .container .credit {
+        margin: 20px 0;
+      }
+
+
+
+.ver-inline-menu{margin:7px;list-style:none}
+
+.portlet.solid{padding:10px}.portlet.solid>.portlet-title>.tools{margin-top:2px;border:0px}.portlet.solid>.portlet-title{margin-bottom:5px;border:0px}.portlet.solid.bordered>.portlet-title{margin-bottom:15px}.portlet.solid.red > .portlet-title,
+.portlet.solid.red > .portlet-title i,
+.portlet.solid.red > .portlet-body,
+.portlet.solid.green > .portlet-title,
+.portlet.solid.green > .portlet-title i,
+.portlet.solid.green > .portlet-body,
+.portlet.solid.yellow > .portlet-title,
+.portlet.solid.yellow > .portlet-title i,
+.portlet.solid.yellow > .portlet-body,
+.portlet.solid.grey > .portlet-title,
+.portlet.solid.grey > .portlet-title i,
+.portlet.solid.grey > .portlet-body,
+.portlet.solid.purple > .portlet-title,
+.portlet.solid.purple > .portlet-title i,
+.portlet.solid.purple > .portlet-body,
+.portlet.solid.blue > .portlet-title,
+.portlet.solid.blue > .portlet-title i,.portlet.solid.blue>.portlet-body{border:0;color:#fff}.portlet.bordered{border-left:2px solid #ddd}.portlet.box{padding:0px
+!important}.portlet.box>.portlet-title{padding:8px
+10px 2px 10px;border-bottom:1px solid #eee;color:#fff !important}.portlet.box>.portlet-title>.actions>.btn>i{color:#fff !important}.portlet.box>.portlet-title>.tools{margin-top:3px}.portlet.box>.portlet-title>.tools>a.remove,.portlet.solid>.portlet-title>.tools>a.remove{background-image:url(/themes/h2/img/portlet-remove-icon-white.png)}.portlet.box>.portlet-title>.tools>a.config,.portlet.solid>.portlet-title>.tools>a.config{background-image:url(/themes/h2/img/portlet-config-icon-white.png)}.portlet.box>.portlet-title>.tools>a.reload,.portlet.solid>.portlet-title>.tools>a.reload{background-image:url(/themes/h2/img/portlet-reload-icon-white.png)}.portlet.box>.portlet-title>.tools>a.expand,.portlet.solid>.portlet-title>.tools>a.expand{background-image:url(/themes/h2/img/portlet-expand-icon-white.png)}.portlet.box>.portlet-title>.tools>a.collapse,.portlet.solid>.portlet-title>.tools>a.collapse{background-image:url(/themes/h2/img/portlet-collapse-icon-white.png)}.portlet.box>.portlet-body{background-color:#fff;padding:10px}.portlet.box>.portlet-title{margin-bottom:0px}.portlet.box.blue>.portlet-title{background-color:#4b8df8}.portlet.box.blue{border:1px
+solid #b4cef8;border-top:0}.portlet.box.red>.portlet-title{background-color:#e02222}.portlet.box.red{border:1px
+solid #ef8476;border-top:0}.portlet.box.yellow>.portlet-title{background-color:#ffb848}.portlet.box.yellow{border:1px
+solid #fccb7e;border-top:0}.portlet.box.green>.portlet-title{background-color:#35aa47}.portlet.box.green{border:1px
+solid #77e588;border-top:0}.portlet.box.purple>.portlet-title{background-color:#852b99}.portlet.box.purple{border:1px
+solid #af5cc1;border-top:0}.portlet.box.grey>.portlet-title{background-color:#555}.portlet.box.grey{border:1px
+solid #9d9c9c;border-top:0}.portlet.box.light-grey>.portlet-title{background-color:#aaa}.portlet.box.light-grey{border:1px
+solid #bbb;border-top:0}
+
