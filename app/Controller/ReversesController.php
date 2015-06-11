@@ -64,114 +64,117 @@ class ReversesController extends AppController {
                 $this->roleId = $this->Session->read('Auth.User.group_id'); 
                 $this->userId = $this->Session->read('Auth.User.id');
                 $this->carrieruserId = $this->Session->read('Auth.User.carrier_id');  
-		//$this->Reverse->recursive = 0;
-		//$this->set('reverses', $this->Paginator->paginate());
                 $statusColeta = $this->request->data['Reverse']['status_id'];
                 $userColeta = $this->request->data['Reverse']['user'];
                 $dataDe = $this->request->data['Reverse']['from'];
                 $dataAte = $this->request->data['Reverse']['to'];
-                //$numNF = $this->request->data['Reverse']['nota'];
-                
-                if($this->roleId == '1'){
-                    //$this->Reverse->recursive = 0;
-                    //$this->paginate = array('limit' => '1000');
-                    //$reverses = $this->paginate('Reverse');
-                    //$this->set(compact('reverses'));
+                $statusID = $this->request->query['status_id'];
+                $userID = $this->request->query['user'];
 
-                    //$dadosReversa = $this->Reverse->User->read(null, array('User.username' => $userColeta));
-                    $dadosReversa = $this->Reverse->User->findAllByEmailOrUsername(NULL, $userColeta);
-                    $userId =  $dadosReversa[0]['User']['id'];
+    if($this->roleId == '1'){
+
+                $dadosReversa = $this->Reverse->User->findAllByEmailOrUsername(NULL, $userColeta);
+                $userId =  $dadosReversa[0]['User']['id'];
                     
-              if($userId == NULL AND $statusColeta == NULL){       
+        if($userId == NULL AND $statusColeta == NULL){       
                   
                 $this->paginate = array(
                     'conditions' => array(
-                       // 'AND' => array(
-                                'AND' => array(
-                                    //'Reverse.status_id' => $statusColeta,
-                                    //'Reverse.user_id' => $userId,
-                                    
-                                ),
                                 'OR' => array(
-                                    
-                                    'Reverse.created BETWEEN ? AND ? ' => array($dataDe, $dataAte),
-                                       
+                                    'Reverse.created BETWEEN ? AND ? ' => array($dataDe, $dataAte),   
                                 )
-                            //)
                         ),
                     'limit' => '1000'
                 ); 
+
                 $reverses = $this->paginate('Reverse');
                 $this->set(compact('reverses'));
                 
-              }else if($userId != NULL AND $statusColeta == NULL){
+        }else if($userId != NULL AND $statusColeta == NULL){
                    
                 $this->paginate = array(
                     'conditions' => array(
-                       // 'AND' => array(
                                 'AND' => array(
-                                    //'Reverse.status_id' => $statusColeta,
                                     'Reverse.user_id' => $userId,
-                                    
                                 ),
                                 'OR' => array(
-                                    
-                                    'Reverse.created BETWEEN ? AND ? ' => array($dataDe, $dataAte),
-                                       
+                                    'Reverse.created BETWEEN ? AND ? ' => array($dataDe, $dataAte),  
                                 )
-                            //)
-                        ),
+                    ),
                     'limit' => '1000'
                 );
-                    $reverses = $this->paginate('Reverse');
-                    $this->set(compact('reverses'));
+
+                $reverses = $this->paginate('Reverse');
+                $this->set(compact('reverses'));
                     
-              }else if($userId != NULL AND $statusColeta != NULL){
+        }else if($userId != NULL AND $statusColeta != NULL){
                   
-                $this->paginate = array(
+               $reverses = $this->paginate = array(
                     'conditions' => array(
-                       // 'AND' => array(
                                 'AND' => array(
                                     'Reverse.status_id' => $statusColeta,
                                     'Reverse.user_id' => $userId,
-                                    
                                 ),
                                 'OR' => array(
-                                    
-                                    'Reverse.created BETWEEN ? AND ? ' => array($dataDe, $dataAte),
-                                       
+                                    'Reverse.created BETWEEN ? AND ? ' => array($dataDe, $dataAte),  
                                 )
-                            //)
-                        ),
+                    ),
                     'limit' => '1000'
-                );
-                    $reverses = $this->paginate('Reverse');
-                    $this->set(compact('reverses'));
-                    
-              }else if($userId == NULL AND $statusColeta != NULL){
-                  
-                $this->paginate = array(
+                ); 
+
+                $reverses = $this->paginate('Reverse');
+                $this->set(compact('reverses'));
+
+        }else if($userID == NULL  AND $statusID != NULL){
+
+        //$statusColeta
+        //$userId
+            
+        App::uses('Sanitize', 'Utility');
+        $status_id = Sanitize::clean($this->request->query['status_id'], array('encode' => false));
+        $from = Sanitize::clean($this->request->query['from'], array('encode' => false));
+        $to = Sanitize::clean($this->request->query['to'], array('encode' => false));
+        print_r($status_id);
+               $this->paginate = array(
                     'conditions' => array(
                        'AND' => array(
                                 'AND' => array(
-                                    'Reverse.status_id' => $statusColeta,
+                                    'Reverse.status_id' => $status_id,
                                     //'Reverse.user_id' => $userId,
                                     
                                 ),
                                 'OR' => array(
                                     
-                                    'Reverse.created BETWEEN ? AND ? ' => array($dataDe, $dataAte),
+                                    'Reverse.created BETWEEN ? AND ? ' => array($from, $to),
                                        
                                 )
                             )
                         ),
-                    'limit' => '1000'
-                );
+                    'limit' => '10'
+                ); 
+
                     $reverses = $this->paginate('Reverse');
-                    $this->set(compact('reverses'));
+                    $this->set(compact('status_id','reverses', 'from', 'to'));
+                   Debugger::dump($reverses);
+              /*  $reverses = $this->Reverse->find('all', array(
+                    'conditions' => array(
+                            'AND' => array(
+                                    'Reverse.status_id' => $statusColeta,
+                                    'Reverse.user_id' => $userId, 
+                            ),
+                            'OR' => array(
+                                 'Reverse.created BETWEEN ? AND ? ' => array($dataDe, $dataAte),
+                            )
+                    ),
+                    //'limit' => '1000'
+                )
+                );
+
+                $this->set('reverses', $this->Paginator->paginate());
+            */
                     
-              }
-                }else if($this->roleId == '3'){
+        }
+    }else if($this->roleId == '3'){
                 
                 $this->paginate = array(
                     'conditions' => array(
@@ -187,14 +190,17 @@ class ReversesController extends AppController {
                         ),
                     'limit' => '1000'
                 );
-                    $reverses = $this->paginate('Reverse');
-                    $this->set(compact('reverses'));
-                }else if($this->roleId == '2'){
+
+                $reverses = $this->paginate('Reverse');
+                $this->set(compact('reverses'));
+
+
+    }else if($this->roleId == '2'){
                     
                 $this->paginate = array(
                     'conditions' => array(
                         'AND' => array(
-                        'AND' => array(
+                            'AND' => array(
                                'Reverse.status_id' => $statusColeta, 
                             ),
                         'OR' => array(
@@ -205,10 +211,11 @@ class ReversesController extends AppController {
                         ),
                     'limit' => '1000'
                 );
-                    $reverses = $this->paginate('Reverse');
-                    $this->set(compact('reverses'));
 
-                }else if($this->roleId == '4'){
+                $reverses = $this->paginate('Reverse');
+                $this->set(compact('reverses'));
+
+    }else if($this->roleId == '4'){
 
                 $this->Reverse->recursive = 1;   
                 $reverses = $this->Reverse->find('all', array(
@@ -227,11 +234,10 @@ class ReversesController extends AppController {
                     'limit' => '1000'
                 )
                 );
-                   // $reverses = $this->paginate('Reverse');
                     $this->set(compact('reverses'));
                     //   Debugger::dump($reverses);
-                }    
-	}
+    }    
+}
 
 /**
  * view method
@@ -938,5 +944,35 @@ class ReversesController extends AppController {
         $this->set(compact('reverses'));
 
         //Debugger::dump($reverses);
+    }
+
+    public function validarNF($id = null){
+        if ($this->request->is('ajax')) {
+
+            $id = $this->request->data['id'];
+            $userID = $this->Session->read('Auth.User.id');
+
+            $reverses = $this->Reverse->find('all', 
+                    array(
+                        'conditions' => array(
+                            'Reverse.invoice' => $id,
+                            'Reverse.user_id' => $userID,
+                        ),
+                        //'order' => array('Reverse.created' => 'ASC'),
+                       // 'limit' => '1'
+                    )
+            );
+
+           foreach($reverses as $row){
+
+                echo ($row['Reverse']['id']) ? 1 : 0;
+                    
+           }
+
+          //$reverse = $this->set(compact('reverses')); 
+          //return $reverse;
+
+            //print_r($reverses);
+        }
     }
 }

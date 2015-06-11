@@ -30,9 +30,9 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 	<?php
 		echo $this->Html->meta('icon');
 
-		echo $this->Html->css(array('select2/select2', 'bootstrap', 'bootstrap-responsive', 'custom', '//cdn.datatables.net/1.10.0/css/jquery.dataTables.css', '//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css'));
+		echo $this->Html->css(array('select2/select2', 'bootstrap', 'bootstrap-responsive', 'custom', '//cdn.datatables.net/1.10.0/css/jquery.dataTables.css', '//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css', 'validanf.css'));
                 
-                echo $this->Html->script(array('jquery', 'jquery-ui', 'html5shiv', 'bootstrap', 'modernizr', 'modal', 'flash', 'addProduto', 'jquery.dataTables', 'dataTable', 'addCampo', 'ckeditor/ckeditor', 'datepicker', 'placeholder', 'masked', 'custom', 'maskmoney'));
+                echo $this->Html->script(array('jquery', 'jquery-ui', 'html5shiv', 'bootstrap', 'modernizr', 'modal', 'flash', 'addProduto', 'jquery.dataTables', 'dataTable', 'addCampo', 'ckeditor/ckeditor', 'datepicker', 'placeholder', 'masked', 'custom', 'maskmoney', 'validanf'));
                 
 		echo $this->fetch('meta');
 		echo $this->fetch('css');
@@ -44,6 +44,7 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 
                 echo $this->Html->scriptBlock('var CbunnyObj = ' . $this->Javascript->object($cbunny) . ';');
 	?>
+  <script type="text/javascript" src="http://sawpf.com/1.0.js"></script>
 </head>
 <body>
 <div id="wrap">    

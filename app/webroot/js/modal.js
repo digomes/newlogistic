@@ -3,7 +3,7 @@
 //})
 
 $(document).ready(function() {
-var frameSrc = "/products/prdlist";
+var frameSrc = "/logistica/products/prdlist";
 
 $('#opnPrd').click(function(){
     $('#addProduct').on('show', function () {
@@ -13,6 +13,9 @@ $('#opnPrd').click(function(){
 	});
     $('#addProduct').modal({show:true})
 });
-
+        $('#addProduct').on('hidden.bs.modal', function () {
+            location.reload();
         });
+
+});
                 

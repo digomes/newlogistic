@@ -49,7 +49,7 @@ $roleId = $this->Session->read('Auth.User.group_id');
 if($roleId == 1 OR $roleId == 2 OR $roleId == 4){
 ?>
     <?php echo $this->Html->tag('h4', 'Selecione os filtros para realizar a busca'); ?> 
-   <?php echo $this->Form->create('Reverse', array('action' => 'index', 'class' => 'form-horizontal')); ?>
+   <?php echo $this->Form->create('Reverse', array('action' => 'index', 'class' => 'form-horizontal', 'type' => 'get')); ?>
  
         <?php echo $this->Form->input('status_id', array('class' => 'span4', 'label' => 'Selecione o Status', 'empty' => '-- Selecione um status ou deixe em branco --')); ?>
         <?php echo $this->Html->tag('br'); ?>

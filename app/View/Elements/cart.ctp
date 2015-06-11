@@ -52,7 +52,8 @@
             
             <!--<input name="data[ReversesProduct][embalagem][]" type="checkbox" value="1" id="ReversesProductEmbalagem">
             <label for="ProductEmbalagem">Sim</label>-->
-             <?php echo $this->Form->input('ReversesProduct.'.$key.'.invoice', array('type' => 'number', 'label' => 'Numero NF', 'class' => 'span2', 'required' => 'required'));?>
+              <div id="msg"></div>
+             <?php echo $this->Form->input('ReversesProduct.'.$key.'.invoice', array('type' => 'number', 'label' => 'Numero NF Envision', 'class' => 'span2', 'required' => 'required', 'id' => 'nota'.$key.'', 'onkeyup' => 'limitarInput(this)'));?>
         </td>        
         <td>
             <?php 
@@ -97,10 +98,16 @@
 <!-- Modal -->
 <div id="addProduct" class="modal hide fade modal-admin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-static="true">
   <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <button type="button" id="clsPrd" class="close" data-dismiss="modal" aria-hidden="true">Fechar</button>
     <h3 id="myModalLabel">Adicionar Produtos</h3>
   </div>
   <div class="modal-body">
       <iframe src="" style="zoom:1" width="99.5%" height="650px"  frameborder="0"></iframe>
   </div>
+        <div class="modal-footer">
+        <button type="button" id="clsPrd" class="btn btn-default" data-dismiss="modal">Fechar</button>
+        <!--<button type="button" class="btn btn-primary">Save changes</button>-->
+      </div>
 </div>
+
+

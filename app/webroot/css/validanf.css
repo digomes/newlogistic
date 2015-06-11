@@ -1,0 +1,29 @@
+.borda-sucesso {
+	border-color:#390!important
+}
+.borda-erro {
+	border-color:#C33!important
+}
+.cor-sucesso {
+	color:#390
+}
+.cor-erro {
+	color:#C33
+}
+.resposta {
+	display:block;
+	width:25px;
+	height:31px;
+	background-repeat:no-repeat;
+	position:absolute;
+	right:5px;
+	top:-7px;
+	background-color:#fff;
+	background-position:7px 10px
+}
+.sucesso {
+	background-image:url(/img/sucesso.png)
+}
+.erro {
+	background-image:url(/img/erro.png)
+}

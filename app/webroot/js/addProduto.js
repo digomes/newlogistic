@@ -5,16 +5,16 @@ $(document).ready(function(){
                  var a = $(this).val();
 		$.ajax({
 			type: "POST",
-			url: "/products/addProd",
+			url: "/logistica/products/addProd",
 			//data: {id: $("#newprod").attr("value")},
-                          data: {id: a}, 
+            data: {id: a}, 
 			success: function(data) {
 				$('#msg').html('<div class="alert alert-success flash-msg">Produto Adicionado com Sucesso !!</div>');
-				$('.flash-msg').delay(3000).fadeOut('slow');
+				$('.flash-msg').delay(1000).fadeOut('slow');
 			},
 			error: function() {
 				$('#msg').html('<div class="alert alert-error flash-msg">Erro ao Adicionar o produto</div>');
-				$('.flash-msg').delay(3000).fadeOut('slow');
+				$('.flash-msg').delay(1000).fadeOut('slow');
 			}
 		});
 
