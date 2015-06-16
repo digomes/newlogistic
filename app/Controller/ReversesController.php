@@ -946,33 +946,5 @@ class ReversesController extends AppController {
         //Debugger::dump($reverses);
     }
 
-    public function validarNF($id = null){
-        if ($this->request->is('ajax')) {
 
-            $id = $this->request->data['id'];
-            $userID = $this->Session->read('Auth.User.id');
-
-            $reverses = $this->Reverse->find('all', 
-                    array(
-                        'conditions' => array(
-                            'Reverse.invoice' => $id,
-                            'Reverse.user_id' => $userID,
-                        ),
-                        //'order' => array('Reverse.created' => 'ASC'),
-                       // 'limit' => '1'
-                    )
-            );
-
-           foreach($reverses as $row){
-
-                echo ($row['Reverse']['id']) ? 1 : 0;
-                    
-           }
-
-          //$reverse = $this->set(compact('reverses')); 
-          //return $reverse;
-
-            //print_r($reverses);
-        }
-    }
 }

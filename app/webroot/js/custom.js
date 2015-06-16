@@ -30,3 +30,10 @@ $(document).ready(function(){
  $(document).ready(function(){
   $('[data-toggle="tooltip"]').tooltip()
 });
+
+$('#myModal').on('shown.bs.modal', function () {
+
+});
+  $('#myModal').modal({
+  
+});

@@ -22,16 +22,18 @@ $(function(e){
 
 						$.ajax({
 							type:'POST',
-							url: "/logistica/reverses/validarNF",
+							url: "/logistica/collections/validarNF",
 							//data:'nota='+ valor,
 							data: {id: valor},
 							//dataType: 'json',
 							success:function(html){
 								if(html!=1){
-									retorno(tipo,'erro',config[8])
+									retorno(tipo,'erro',config[8]);
+									validaNF();
 								}
 								else{
 									retorno(tipo,'sucesso',config[10])
+									//validaNF();
 								}
 							}
 						/*	success:function(data){	
@@ -97,4 +99,30 @@ function validanota(nota){
 
   function limitarInput(obj) {
     obj.value = obj.value.substring(0,9); //Aqui eu pego o valor e só deixo o os 10 primeiros caracteres de valor no input
+  }
+
+  function validaNF(){
+  	  var classname = $('input[type="number"]').hasClass('borda-erro');
+
+  	if(classname){
+    	alert("Essa nota fiscal não pertence ao posto");
+  	}
+
+  }
+
+  function validaForm(frm){
+  	  var classname = $('input[type="number"]').hasClass('borda-erro');
+
+  	if(classname){
+  		//$('#myModal').modal('show');
+		$('#myModal').modal({
+			Show: true,
+  			keyboard: false
+		});
+    	//alert("O campo Numero NF Envision está preenchido incorretamente, por favor verifique.");
+    	return false;
+  	}else{
+  		return true;
+  	}
+
   }

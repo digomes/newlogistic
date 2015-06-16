@@ -1,5 +1,5 @@
 <div class="row">
-    <?php echo $this->Form->create('Reverse', array('type' => 'file', 'class' => 'form-horizontal')); ?>
+    <?php echo $this->Form->create('Reverse', array('type' => 'file', 'class' => 'form-horizontal', 'onsubmit' => 'return validaForm(this)')); ?>
 	<fieldset>
 		<legend><strong><h3><?php echo __('Nova Coleta Reversa'); ?></h3></strong></legend>
     <div class="span12">            
@@ -32,7 +32,7 @@
             <?php echo $this->Form->input('serie', array('label' => 'Série', 'class' => 'input-medium', 'required')); ?>
         </div>
         <div class="span2">
-            <?php echo $this->Form->input('quantity', array('label' => 'Volume', 'class' => 'input-medium', 'required')); ?>
+            <?php echo $this->Form->input('quantity', array('type' => 'text', 'label' => 'Volume', 'class' => 'input-medium', 'required')); ?>
         </div>
         <div class="input-prepend">
             <label for="ReverseQuantity">Valor da NF</label>
@@ -79,3 +79,21 @@
     <?php echo $this->Form->end(); ?>
 </div>
 
+
+<div class="modal fade" id="myModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Erro no Formulário</h4>
+      </div>
+      <div class="modal-body">
+        <p>Você não preencheu corretamente o campo "<b>Numero NF Envision</b>", por favor preencha corretamente e tente novamente. </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+        <!--<button type="button" class="btn btn-primary">Save changes</button>-->
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
