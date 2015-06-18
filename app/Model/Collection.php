@@ -12,6 +12,13 @@ class Collection extends AppModel {
  *
  * @var array
  */
+
+        public $actsAs = array(
+            'Utils.CsvImport' => array(
+                'delimiter'  => ';'
+            )
+        );
+
 /*	public $validate = array(
 		'user_id' => array(
 			'numeric' => array(

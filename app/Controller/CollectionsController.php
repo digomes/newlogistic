@@ -46,7 +46,36 @@ class CollectionsController extends AppController {
  *
  * @return void
  */
+
 	public function add() {
+            
+        $modelClass = 'Collection';
+            if ($this->request->is('Post')) {
+                $this->$modelClass->create();
+                
+                //$fixed = array('Part' => array('category_id' => $idCategory));
+                $records_count = $this->$modelClass->find( 'count' );
+                try {
+                    $this->$modelClass->importCSV( $this->request->data[$modelClass]['CsvFile']['tmp_name']);
+                    
+                } catch (Exception $e) {
+                    $import_errors = $this->$modelClass->getImportErrors();
+                    $this->set( 'import_errors', $import_errors );
+                    $this->Session->setFlash( __('Error Importing') . ' ' . $this->request->data[$modelClass]['CsvFile']['name'] . ', ' . __('column name mismatch.')  );
+                    $this->redirect( array('action'=>'add') );
+                    
+                }
+         
+                $new_records_count = $this->$modelClass->find( 'count' ) - $records_count;
+                $this->Session->setFlash(__('Successfully imported') . ' ' . $new_records_count .  ' records from ' . $this->request->data[$modelClass]['CsvFile']['name'] );
+                $this->redirect( array('action'=>'index') );
+            }
+            $this->set('modelClass', $modelClass );
+                
+	}
+
+
+/*	public function add() {
 		if ($this->request->is('post')) {
 			$this->Collection->create();
 			if ($this->Collection->save($this->request->data)) {
@@ -56,10 +85,10 @@ class CollectionsController extends AppController {
 				$this->Session->setFlash(__('The collection could not be saved. Please, try again.'));
 			}
 		}
-		$users = $this->Collection->User->find('list');
-		$this->set(compact('users'));
+		//$users = $this->Collection->User->find('list');
+		//$this->set(compact('users'));
 	}
-
+*/
 /**
  * edit method
  *
