@@ -144,6 +144,18 @@ class AppController extends Controller {
                 'permissions' => array('1'),
             ),
             array(
+                'title' => 'Coletas',
+                //'url' => array('controller' => 'carriers', 'action' => 'index'),
+                'permissions' => array('1'),
+                'children' => array(
+                    array(
+                        'title' => __('Adicionar'),
+                        'url' => array('controller' => 'Collections', 'action' => 'add'),
+                        'permissions' => array('1'),
+                    ),
+                )
+            ),
+            array(
                 'title' => 'Logout',
                 'url' => array('controller' => 'Users', 'action' => 'logout'),
                 'permissions' => array('1', '2', '3', '4'),

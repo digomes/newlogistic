@@ -48,12 +48,12 @@ class EmailConfig {
 
 	public $smtp = array(
 		'transport' => 'Smtp',
-		'from' => array('contato@tudodegraca.net' => 'Coletas Logistica Reversa - ENVISION'),
-		'host' => 'mail.tudodegraca.net',
+		'from' => array('contato@teste.net' => 'Coletas Logistica Reversa - ENVISION'),
+		'host' => 'mail.teste.net',
 		'port' => 587,
 		'timeout' => 360,
-		'username' => 'contato@tudodegraca.net',
-		'password' => 'di210190',
+		'username' => 'contato@teste.net',
+		'password' => 'teste',
 		'client' => null,
 		'log' => false,
 		'format' => 'html',

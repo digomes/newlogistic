@@ -20,27 +20,54 @@
 	"buffers":
 	[
 		{
-			"file": "app/Controller/CollectionsController.php",
+			"file": "app/View/Reverses/search.ctp",
 			"settings":
 			{
-				"buffer_size": 5151,
+				"buffer_size": 4058,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "app/webroot/js/forms.js",
+			"settings":
+			{
+				"buffer_size": 71,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "app/View/Collections/add.ctp",
+			"file": "app/Config/core.php",
 			"settings":
 			{
-				"buffer_size": 477,
+				"buffer_size": 14538,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "app/View/Collections/index.ctp",
+			"contents": "<?php\nApp::uses('AppController', 'Controller');\nApp::uses('CakeEmail', 'Network/Email');\n/**\n * Reverses Controller\n *\n * @property Reverse $Reverse\n * @property PaginatorComponent $Paginator\n */\nclass ReversesController extends AppController {\n\n/**\n * Components\n *\n * @var array\n */\n	//public $components = array('Paginator');\n        \n        public $components = array(\n            'RequestHandler' => array(\n                'viewClassMap' => array('csv' => 'CsvView.Csv')\n            ),\n            'Paginator'\n        );\n\n        \n        public function search(){\n            if($this->request->is('post')){\n                $idColeta = $this->request->data['Reverse']['coleta'];\n                if (!$this->Reverse->exists($idColeta)) {\n                    $this->Session->setFlash(__('Esse numero de coleta é inválido, por favor digite outro.'));\n                    $this->redirect(array('controller' => 'reverses' ,'action' => 'search'));\n			//throw new NotFoundException(__('Invalid reverse'));\n                }else{\n                    $dadosReversa = $this->Reverse->read(null, $idColeta);\n                    $userId =  $dadosReversa['Reverse']['user_id'];\n                    $this->userId = $this->Session->read('Auth.User.id');\n                    $this->roleId = $this->Session->read('Auth.User.group_id'); \n                    \n                    if($this->roleId == 1 OR $this->roleId == 2){\n                       $this->redirect(array('controller' => 'reverses' ,'action' => 'view', $idColeta)); \n                    }else{    \n                        if($userId == $this->userId){\n                            $this->redirect(array('controller' => 'reverses' ,'action' => 'view', $idColeta));\n                        }else{\n                            $this->Session->setFlash(__('Esse numero de coleta é inválido, por favor digite o numero correto.'));\n                        }\n                    }    \n                    }\n                }\n                $statuses = $this->Reverse->Status->find('list');\n                //$workshops = $this->Reverse->User->Workshop->find('list');\n                $this->set(compact('statuses'));\n            }\n            \n/**\n * index method\n *\n * @return void\n */\n        \n	public function index() {\n            \n                $this->roleId = $this->Session->read('Auth.User.group_id'); \n                $this->userId = $this->Session->read('Auth.User.id');\n                $this->carrieruserId = $this->Session->read('Auth.User.carrier_id');  \n                $statusColeta = $this->request->data['Reverse']['status_id'];\n                $userColeta = $this->request->data['Reverse']['user'];\n                $dataDe = $this->request->data['Reverse']['from'];\n                $dataAte = $this->request->data['Reverse']['to'];\n                $statusID = $this->request->query['status_id'];\n                $userID = $this->request->query['user'];\n\n    if($this->roleId == '1'){\n\n                $dadosReversa = $this->Reverse->User->findAllByEmailOrUsername(NULL, $userColeta);\n                $userId =  $dadosReversa[0]['User']['id'];\n                    \n        if($userId == NULL AND $statusColeta == NULL){       \n                  \n                $this->paginate = array(\n                    'conditions' => array(\n                                'OR' => array(\n                                    'Reverse.created BETWEEN ? AND ? ' => array($dataDe, $dataAte),   \n                                )\n                        ),\n                    'limit' => '1000'\n                ); \n\n                $reverses = $this->paginate('Reverse');\n                $this->set(compact('reverses'));\n                \n        }else if($userId != NULL AND $statusColeta == NULL){\n                   \n                $this->paginate = array(\n                    'conditions' => array(\n                                'AND' => array(\n                                    'Reverse.user_id' => $userId,\n                                ),\n                                'OR' => array(\n                                    'Reverse.created BETWEEN ? AND ? ' => array($dataDe, $dataAte),  \n                                )\n                    ),\n                    'limit' => '1000'\n                );\n\n                $reverses = $this->paginate('Reverse');\n                $this->set(compact('reverses'));\n                    \n        }else if($userId != NULL AND $statusColeta != NULL){\n                  \n               $reverses = $this->paginate = array(\n                    'conditions' => array(\n                                'AND' => array(\n                                    'Reverse.status_id' => $statusColeta,\n                                    'Reverse.user_id' => $userId,\n                                ),\n                                'OR' => array(\n                                    'Reverse.created BETWEEN ? AND ? ' => array($dataDe, $dataAte),  \n                                )\n                    ),\n                    'limit' => '1000'\n                ); \n\n                $reverses = $this->paginate('Reverse');\n                $this->set(compact('reverses'));\n\n        }else if($userID == NULL  AND $statusID != NULL){\n\n        //$statusColeta\n        //$userId\n            \n       // App::uses('Sanitize', 'Utility');\n        //$status_id = Sanitize::clean($this->request->query['status_id'], array('encode' => false));\n        //$from = Sanitize::clean($this->request->query['from'], array('encode' => false));\n        //$to = Sanitize::clean($this->request->query['to'], array('encode' => false));\n        //print_r($status_id);\n               $this->paginate = array(\n                    'conditions' => array(\n                       'AND' => array(\n                                'AND' => array(\n                                    'Reverse.status_id' => $statusID,\n                                    //'Reverse.user_id' => $userId,\n                                    \n                                ),\n                                'OR' => array(\n                                    \n                                    'Reverse.created BETWEEN ? AND ? ' => array($dataDe, $dataAte),\n                                       \n                                )\n                            )\n                        ),\n                    'limit' => '10'\n                ); \n\n                    $reverses = $this->paginate('Reverse');\n                    $this->set(compact('reverses'));\n                   //Debugger::dump($reverses);\n               $reverses = $this->Reverse->find('all', array(\n                    'conditions' => array(\n                            'AND' => array(\n                                    'Reverse.status_id' => $statusColeta,\n                                    'Reverse.user_id' => $userId, \n                            ),\n                            'OR' => array(\n                                 'Reverse.created BETWEEN ? AND ? ' => array($dataDe, $dataAte),\n                            )\n                    ),\n                    //'limit' => '1000'\n                )\n                );\n\n                $this->set('reverses', $this->Paginator->paginate());\n            \n                    \n        }\n    }else if($this->roleId == '3'){\n                \n                $this->paginate = array(\n                    'conditions' => array(\n                        'OR' => array(\n                                'AND' => array(\n                                    'Status.visibility_groups' => '',\n                                    'Status.visibility_groups LIKE' => '%\"' . $this->roleId . '\"%',\n                                ),\n                                'AND' => array(\n                                    'Reverse.user_id' => $this->userId,\n                                )\n                            )\n                        ),\n                    'limit' => '1000'\n                );\n\n                $reverses = $this->paginate('Reverse');\n                $this->set(compact('reverses'));\n\n\n    }else if($this->roleId == '2'){\n                    \n                $this->paginate = array(\n                    'conditions' => array(\n                        'AND' => array(\n                            'AND' => array(\n                               'Reverse.status_id' => $statusColeta, \n                            ),\n                        'OR' => array(\n                            'Status.visibility_groups' => '',\n                            'Status.visibility_groups LIKE' => '%\"' . $this->roleId . '\"%',\n                            )\n                        )\n                        ),\n                    'limit' => '1000'\n                );\n\n                $reverses = $this->paginate('Reverse');\n                $this->set(compact('reverses'));\n\n    }else if($this->roleId == '4'){\n\n                $this->Reverse->recursive = 1;   \n                $reverses = $this->Reverse->find('all', array(\n                    'conditions' => array(\n                        'AND' => array(\n                            'AND' => array(\n                                'Reverse.status_id' => $statusColeta, \n                            ),\n                            'OR' => array(\n                                'Reverse.status_id' => '10', \n                                'Status.visibility_groups LIKE' => '%\"' . $this->roleId . '\"%',\n                                'Reverse.carrier_id =' => $this->carrieruserId\n                            )\n                        )\n                    ),\n                    'limit' => '1000'\n                )\n                );\n                    $this->set(compact('reverses'));\n                    //   Debugger::dump($reverses);\n    }    \n}\n\n/**\n * view method\n *\n * @throws NotFoundException\n * @param string $id\n * @return void\n */\n	public function view($id = null) {\n		if (!$this->Reverse->exists($id)) {\n			throw new NotFoundException(__('Invalid reverse'));\n		}\n		$options = array('conditions' => array('Reverse.' . $this->Reverse->primaryKey => $id));\n		$this->set('reverse', $this->Reverse->find('first', $options));\n	}\n\n/**\n * add method\n *\n * @return void\n */\n        \n	public function add() {\n		if ($this->request->is('post')) {\n                        if ($this->request->data['ReversesProduct']['0'] == '') {\n                            $this->Session->setFlash(__('É necessário selecionar ao menos um produto para coleta'));   \n                            $this->redirect($this->referer());\n                        }\n                            //$this->roleId = $this->Session->read('Auth.User.group_id');\n			try {\n                                $this->request->data['Reverse']['user_id'] = $this->Auth->user('id');\n                                $this->request->data['Reverse']['carrier_id'] = $this->Auth->user('Workshop.carrier_id');\n				//$this->Reverse->createWithAttachments($this->request->data);\n                                $this->Reverse->saveAll($this->request->data);\n				$this->Session->setFlash(__('Nota Fiscal enviada para aprovação do Departamento Fiscal ! Coleta Numero #'.$this->Reverse->getLastInsertID()));\n                                $this->Session->delete('Cart');\n                                $this->Session->delete('Counter');\n                                return $this->redirect(array('controller' => 'Reverses' ,'action' => 'search'));\n			} catch (Exception $e) {\n				$this->Session->setFlash($e->getMessage());\n			}\n		}\n		$statuses = $this->Reverse->Status->find('list');\n		$costs = $this->Reverse->Cost->find('list');\n        $types = $this->Reverse->Upload->Type->find('list');\n		//$uploads = $this->Reverse->Upload->find('list');\n		$this->set(compact('costs', 'types', 'statuses'));\n               // Debugger::dump($this->request->data);\n               // $this->Session->delete('Cart');\n               // $this->Session->delete('Counter');\n	}\n        \n\n/**\n * edit method\n *\n * @throws NotFoundException\n * @param string $id\n * @return void\n */\n	public function edit($id = null) {\n		if (!$this->Reverse->exists($id)) {\n			throw new NotFoundException(__('Invalid reverse'));\n		}\n		if ($this->request->is(array('post', 'put'))) {\n			if ($this->Reverse->save($this->request->data)) {\n				$this->Session->setFlash(__('The reverse has been saved.'));\n				return $this->redirect(array('action' => 'index'));\n			} else {\n				$this->Session->setFlash(__('The reverse could not be saved. Please, try again.'));\n			}\n		} else {\n			$options = array('conditions' => array('Reverse.' . $this->Reverse->primaryKey => $id));\n			$this->request->data = $this->Reverse->find('first', $options);\n		}\n		$statuses = $this->Reverse->Status->find('list');\n		$costs = $this->Reverse->Cost->find('list');\n		$uploads = $this->Reverse->Upload->find('list');\n                $types = $this->Reverse->Upload->Type->find('list');\n		$this->set(compact('statuses', 'costs', 'uploads', 'types'));\n	}\n\n/**\n * delete method\n *\n * @throws NotFoundException\n * @param string $id\n * @return void\n */\n	public function delete($id = null) {\n		$this->Reverse->id = $id;\n		if (!$this->Reverse->exists()) {\n			throw new NotFoundException(__('Invalid reverse'));\n		}\n		$this->request->allowMethod('post', 'delete');\n		if ($this->Reverse->delete()) {\n			$this->Session->setFlash(__('The reverse has been deleted.'));\n		} else {\n			$this->Session->setFlash(__('The reverse could not be deleted. Please, try again.'));\n		}\n		return $this->redirect(array('action' => 'index'));\n	}\n        \n    /**\n     * use beforeRender to send session parameters to the layout view\n     */\n    public function beforeRender() {\n        parent::beforeRender();\n        $params = $this->Session->read('form.params');\n        $this->set('params', $params);\n    }\n \n    /**\n     * delete session values when going back to index\n     * you may want to keep the session alive instead\n     */\n    public function msf_index() {\n        $this->Session->delete('form');\n    }\n \n    /**\n     * this method is executed before starting the form and retrieves one important parameter:\n     * the form steps number\n     * you can hardcode it, but in this example we are getting it by counting the number of files that start with msf_step_\n     */\n    public function msf_setup() {\n        App::uses('Folder', 'Utility');\n        $reversesViewFolder = new Folder(APP.'View'.DS.'Reverses');\n        $steps = count($reversesViewFolder->find('msf_step_.*\\.ctp'));\n        $this->Session->write('form.params.steps', $steps);\n        $this->Session->write('form.params.maxProgress', 0);\n        $this->redirect(array('action' => 'msf_step', 1));\n    }\n \n    /**\n     * this is the core step handling method\n     * it gets passed the desired step number, performs some checks to prevent smart users skipping steps\n     * checks fields validation, and when succeding, it saves the array in a session, merging with previous results\n     * if we are at last step, data is saved\n     * when no form data is submitted (not a POST request) it sets this->request->data to the values stored in session\n     */\n    public function msf_step($stepNumber) {\n		$statuses = $this->Reverse->Status->find('list');\n		$costs = $this->Reverse->Cost->find('list');\n                $types = $this->Reverse->Upload->Type->find('list');\n		//$uploads = $this->Reverse->Upload->find('list');\n		$this->set(compact('costs', 'types', 'statuses'));\n                Debugger::dump($this->Session->read('form'));\n        /**\n         * check if a view file for this step exists, otherwise redirect to index\n         */\n        if (!file_exists(APP.'View'.DS.'Reverses'.DS.'msf_step_'.$stepNumber.'.ctp')) {\n            $this->redirect('/reverses/msf_index');\n        }\n \n        /**\n         * determines the max allowed step (the last completed + 1)\n         * if choosen step is not allowed (URL manually changed) the user gets redirected\n         * otherwise we store the current step value in the session\n         */\n        $maxAllowed = $this->Session->read('form.params.maxProgress') + 1;\n        if ($stepNumber > $maxAllowed) {\n            $this->redirect('/reverses/msf_step/'.$maxAllowed);\n        } else {\n            $this->Session->write('form.params.currentStep', $stepNumber);\n        }\n \n        /**\n         * check if some data has been submitted via POST\n         * if not, sets the current data to the session data, to automatically populate previously saved fields\n         */\n        if ($this->request->is('post')) {\n \n            /**\n             * set passed data to the model, so we can validate against it without saving\n             */\n            $this->Reverse->set($this->request->data);\n \n            /**\n             * if data validates we merge previous session data with submitted data, using CakePHP powerful Hash class (previously called Set)\n             */\n\n                $prevSessionData = $this->Session->read('form');\n                $currentSessionData = Hash::merge( (array) $prevSessionData, $this->request->data);\n \n                /**\n                 * if this is not the last step we replace session data with the new merged array\n                 * update the max progress value and redirect to the next step\n                 */\n                if ($stepNumber < $this->Session->read('form.params.steps')) {\n                    $this->Session->write('form', $currentSessionData);\n                    $this->Session->write('form.params.maxProgress', $stepNumber);\n                    $this->redirect(array('action' => 'msf_step', $stepNumber+1));\n                } else {\n                    /**\n                     * otherwise, this is the final step, so we have to save the data to the database\n                     */\n                    $this->Reverse->save($currentSessionData);\n                    $this->Session->setFlash('Coleta cadastrada com sucesso!');\n                    //$this->redirect('/reverses/msf_index');\n                }\n            }\n\n \n        /**\n         * here we load the proper view file, depending on the stepNumber variable passed via GET\n         */\n        $this->render('msf_step_'.$stepNumber);\n        \n\n    }\n    \n    public function correct($id = null){\n		$this->Reverse->id = $id;\n                if ($this->request->is('post')) {\n		if (!$this->Reverse->exists()) {\n			throw new NotFoundException(__('Invalid ticket'));\n		}\n		$this->request->onlyAllow('post');\n                //$data = array('id' => $this->Ticket->id, 'condition_id' => '2');\n                if($this->request->data['Reverse']['observation']== ''){\n                    $this->Session->setFlash(__('Digite uma observação para o posto corrigir a coleta'));\n                }else{\n                $this->Reverse->read(null, $this->Ticket->id);\n                $this->Reverse->set('status_id', 12);\n                $this->Reverse->set('observation', $this->request->data['Reverse']['observation']);\n                $this->Reverse->set('modified', date('Y-m-d H:i:s'));\n		if ($this->Reverse->save()) {\n			$this->Session->setFlash(__('Solicitação de correção enviada com sucesso'));\n                        $this->redirect(array('action' => 'index'));\n			//$this->redirect(array('action' => 'view', $this->Ticket->id));\n		}\n		$this->Session->setFlash(__('Não foi possível atender sua solicitação'));\n		$this->redirect(array('action' => 'index'));\n                }\n                \n                }\n    }\n    \n    public function disapprove($id = null){\n		$this->Reverse->id = $id;\n                if ($this->request->is('post')) {\n		if (!$this->Reverse->exists()) {\n			throw new NotFoundException(__('Invalid ticket'));\n		}\n		$this->request->onlyAllow('post');\n                //$data = array('id' => $this->Ticket->id, 'condition_id' => '2');\n                if($this->request->data['Reverse']['observation']== ''){\n                    $this->Session->setFlash(__('Digite uma observação para reprovar a coleta'));\n                }else{\n                $this->Reverse->read(null, $this->Ticket->id);\n                $this->Reverse->set('status_id', 11);\n                $this->Reverse->set('observation', $this->request->data['Reverse']['observation']);\n                $this->Reverse->set('dateobs', date('Y-m-d H:i:s'));\n		if ($this->Reverse->save()) {\n			$this->Session->setFlash(__('Coleta Reprovada'));\n                        $this->redirect(array('action' => 'index'));\n			//$this->redirect(array('action' => 'view', $this->Ticket->id));\n		}\n		$this->Session->setFlash(__('Não foi possível atender sua solicitação'));\n		$this->redirect(array('action' => 'index'));\n                }\n                \n                }\n\n    }\n\n    public function cancel($id = null){\n        $this->Reverse->id = $id;\n                if ($this->request->is('post')) {\n        if (!$this->Reverse->exists()) {\n            throw new NotFoundException(__('Invalid ticket'));\n        }\n        $this->request->onlyAllow('post');\n                //$data = array('id' => $this->Ticket->id, 'condition_id' => '2');\n                if($this->request->data['Reverse']['observation']== ''){\n                    $this->Session->setFlash(__('Digite uma observação para reprovar a coleta'));\n                }else{\n                $this->Reverse->read(null, $this->Reverse->id);\n                $this->Reverse->set('status_id', 1);\n                $this->Reverse->set('observation', $this->request->data['Reverse']['observation']);\n                $this->Reverse->set('dateobs', date('Y-m-d H:i:s'));\n        if ($this->Reverse->save()) {\n            $this->Session->setFlash(__('Coleta está aguardando aprovação novamente'));\n                        //$this->redirect(array('action' => 'view', $id));\n            $this->redirect(array('action' => 'view', $this->Reverse->id));\n        }\n        $this->Session->setFlash(__('Não foi possível atender sua solicitação'));\n        $this->redirect(array('action' => 'index'));\n                }\n                \n                }\n\n    }\n    \n    public function approve($id = null){\n		$this->Reverse->id = $id;\n                if ($this->request->is('post')) {\n		if (!$this->Reverse->exists()) {\n			throw new NotFoundException(__('Invalid ticket'));\n		}\n		$this->request->onlyAllow('post');\n                //$data = array('id' => $this->Ticket->id, 'condition_id' => '2');\n                if($this->request->data['Reverse']['so']== ''){\n                    $this->Session->setFlash(__('Digite o numero da SO para realizar aprovação'));\n                }else{\n                $this->Reverse->read(null, $this->Reverse->id);\n                $this->Reverse->set('status_id', 10);\n                $this->Reverse->set('so', $this->request->data['Reverse']['so']);\n                $this->Reverse->set('modified', date('Y-m-d H:i:s'));\n		if ($this->Reverse->save()) {\n			$this->Session->setFlash(__('Coleta Aprovada'));\n                        $this->redirect(array('action' => 'index'));\n			//$this->redirect(array('action' => 'view', $this->Ticket->id));\n		}\n		$this->Session->setFlash(__('Não foi possível atender sua solicitação'));\n		$this->redirect(array('action' => 'index'));\n                }\n                }\n    }\n\n    public function inProgress($id = null){\n                $this->Reverse->id = $id;\n        if ($this->request->is('post')) {\n            if (!$this->Reverse->exists()) {\n                throw new NotFoundException(__('Coleta Inválida'));\n            }\n        $this->request->onlyAllow('post');\n                //$data = array('id' => $this->Ticket->id, 'condition_id' => '2');\n                if($this->request->data['Reverse']['dateProgress']== ''){\n                    $this->Session->setFlash(__('Selecione a data da coleta'));\n                }else{\n                    $this->Reverse->read(null, $this->Reverse->id);\n                    $this->Reverse->set('status_id', 3);\n                    $this->Reverse->set('inprogress', $this->request->data['Reverse']['dateProgress']);\n                    //$this->Reverse->set('modified', date('Y-m-d H:i:s'));\n                if ($this->Reverse->save()) {\n                    $this->Session->setFlash(__('Coleta Agendada'));\n                    //$this->redirect(array('action' => 'index'));\n                    $this->redirect(array('action' => 'view', $this->Reverse->id));\n                }\n            $this->Session->setFlash(__('Não foi possível atender sua solicitação'));\n            //$this->redirect(array('action' => 'index'));\n            $this->redirect(array('action' => 'view', $this->Reverse->id));\n                }\n        }\n    }\n    \n\n    public function heldCollection($id = null){\n                $this->Reverse->id = $id;\n        if ($this->request->is('post')) {\n            if (!$this->Reverse->exists()) {\n                throw new NotFoundException(__('Coleta Inválida'));\n            }\n        $this->request->onlyAllow('post');\n                //$data = array('id' => $this->Ticket->id, 'condition_id' => '2');\n                if($this->request->data['Reverse']['dateProgress']== ''){\n                    $this->Session->setFlash(__('Selecione a data da coleta'));\n                }else{\n                    $this->Reverse->read(null, $this->Reverse->id);\n                    $this->Reverse->set('status_id', 4);\n                    $this->Reverse->set('heldcollection', $this->request->data['Reverse']['dateProgress']);\n                    //$this->Reverse->set('modified', date('Y-m-d H:i:s'));\n                if ($this->Reverse->save()) {\n                    $this->Session->setFlash(__('Data da coleta inserida no sistema'));\n                    //$this->redirect(array('action' => 'index'));\n                    $this->redirect(array('action' => 'view', $this->Reverse->id));\n                }\n            $this->Session->setFlash(__('Não foi possível atender sua solicitação'));\n            //$this->redirect(array('action' => 'index'));\n            $this->redirect(array('action' => 'view', $this->Reverse->id));\n                }\n        }\n    }\n\n    public function inCarrier($id = null){\n                $this->Reverse->id = $id;\n        if ($this->request->is('post')) {\n            if (!$this->Reverse->exists()) {\n                throw new NotFoundException(__('Coleta Inválida'));\n            }\n        $this->request->onlyAllow('post');\n                //$data = array('id' => $this->Ticket->id, 'condition_id' => '2');\n                if($this->request->data['Reverse']['dateProgress']== ''){\n                    $this->Session->setFlash(__('Selecione a data da entrega'));\n                }else{\n                    $this->Reverse->read(null, $this->Reverse->id);\n                    $this->Reverse->set('status_id', 15);\n                    $this->Reverse->set('incarrier', $this->request->data['Reverse']['dateProgress']);\n                    //$this->Reverse->set('modified', date('Y-m-d H:i:s'));\n                if ($this->Reverse->save()) {\n                    $this->Session->setFlash(__('Data da entrega inserida no sistema'));\n                    //$this->redirect(array('action' => 'index'));\n                    $this->redirect(array('action' => 'view', $this->Reverse->id));\n                }\n            $this->Session->setFlash(__('Não foi possível atender sua solicitação'));\n            //$this->redirect(array('action' => 'index'));\n            $this->redirect(array('action' => 'view', $this->Reverse->id));\n                }\n        }\n    }\n\n    public function inEnvision($id = null){\n                $this->Reverse->id = $id;\n        if ($this->request->is('post')) {\n            if (!$this->Reverse->exists()) {\n                throw new NotFoundException(__('Coleta Inválida'));\n            }\n        $this->request->onlyAllow('post');\n                //$data = array('id' => $this->Ticket->id, 'condition_id' => '2');\n                if($this->request->data['Reverse']['dateProgress']== '' AND $this->request->data['Reverse']['cte']== ''){\n                    $this->Session->setFlash(__('Selecione a data da entrega e prencha o numero de CTE'));\n                }else{\n                    $this->Reverse->read(null, $this->Reverse->id);\n                    $this->Reverse->set('status_id', 16);\n                    $this->Reverse->set('cte', $this->request->data['Reverse']['cte']);\n                    $this->Reverse->set('inenvision', $this->request->data['Reverse']['dateProgress']);\n                    //$this->Reverse->set('modified', date('Y-m-d H:i:s'));\n                if ($this->Reverse->save()) {\n                    $this->Session->setFlash(__('Dados salvos no sistema com sucesso !'));\n                    //$this->redirect(array('action' => 'index'));\n                    $this->redirect(array('action' => 'view', $this->Reverse->id));\n                }\n            $this->Session->setFlash(__('Não foi possível atender sua solicitação'));\n            //$this->redirect(array('action' => 'index'));\n            $this->redirect(array('action' => 'view', $this->Reverse->id));\n                }\n        }\n    }\n\n    public function sinister($id = null){\n                $this->Reverse->id = $id;\n        if ($this->request->is('post')) {\n            if (!$this->Reverse->exists()) {\n                throw new NotFoundException(__('Coleta Inválida'));\n            }\n        $this->request->onlyAllow('post');\n                //$data = array('id' => $this->Ticket->id, 'condition_id' => '2');\n                if($this->request->data['Reverse']['observation']== ''){\n                    $this->Session->setFlash(__('Digite uma observação'));\n                }else{\n                    $this->Reverse->read(null, $this->Reverse->id);\n                    $this->Reverse->set('status_id', 9);\n                    $this->Reverse->set('observation', $this->request->data['Reverse']['observation']);\n                    $this->Reverse->set('dateobs', date('Y-m-d H:i:s'));\n                if ($this->Reverse->save()) {\n                    $this->Session->setFlash(__('Dados salvos no sistema com sucesso !'));\n                    //$this->redirect(array('action' => 'index'));\n                    $this->redirect(array('action' => 'view', $this->Reverse->id));\n                }\n            $this->Session->setFlash(__('Não foi possível atender sua solicitação'));\n            //$this->redirect(array('action' => 'index'));\n            $this->redirect(array('action' => 'view', $this->Reverse->id));\n                }\n        }\n    }\n\n    public function cancell($id = null){\n                $this->Reverse->id = $id;\n        if ($this->request->is('post')) {\n            if (!$this->Reverse->exists()) {\n                throw new NotFoundException(__('Coleta Inválida'));\n            }\n        $this->request->onlyAllow('post');\n                //$data = array('id' => $this->Ticket->id, 'condition_id' => '2');\n                if($this->request->data['Reverse']['observation']== ''){\n                    $this->Session->setFlash(__('Digite uma observação'));\n                }else{\n                    $this->Reverse->read(null, $this->Reverse->id);\n                    $this->Reverse->set('status_id', 5);\n                    $this->Reverse->set('observation', $this->request->data['Reverse']['observation']);\n                    $this->Reverse->set('dateobs', date('Y-m-d H:i:s'));\n                if ($this->Reverse->save()) {\n                    $this->Session->setFlash(__('Dados salvos no sistema com sucesso !'));\n                    //$this->redirect(array('action' => 'index'));\n                    $this->redirect(array('action' => 'view', $this->Reverse->id));\n                }\n            $this->Session->setFlash(__('Não foi possível atender sua solicitação'));\n            //$this->redirect(array('action' => 'index'));\n            $this->redirect(array('action' => 'view', $this->Reverse->id));\n                }\n        }\n    }\n\n    public function occurrence($id = null){\n                $this->Reverse->id = $id;\n        if ($this->request->is('post')) {\n            if (!$this->Reverse->exists()) {\n                throw new NotFoundException(__('Coleta Inválida'));\n            }\n        $this->request->onlyAllow('post');\n                //$data = array('id' => $this->Ticket->id, 'condition_id' => '2');\n                if($this->request->data['Reverse']['observation']== ''){\n                    $this->Session->setFlash(__('Digite uma observação'));\n                }else{\n                    $this->Reverse->read(null, $this->Reverse->id);\n                    $this->Reverse->set('status_id', 8);\n                    $this->Reverse->set('observation', $this->request->data['Reverse']['observation']);\n                    $this->Reverse->set('dateobs', date('Y-m-d H:i:s'));\n                if ($this->Reverse->save()) {\n                    $this->Session->setFlash(__('Dados salvos no sistema com sucesso !'));\n                    //$this->redirect(array('action' => 'index'));\n                    $this->redirect(array('action' => 'view', $this->Reverse->id));\n                }\n            $this->Session->setFlash(__('Não foi possível atender sua solicitação'));\n            //$this->redirect(array('action' => 'index'));\n            $this->redirect(array('action' => 'view', $this->Reverse->id));\n                }\n        }\n    }\n\n    \n        public function exportData($id = null){\n            $this->Userid = $id;\n                $reverses = $this->Reverse->find('all', \n                    array(\n                        'conditions' => array(\n                            'Reverse.user_id' => $this->Userid\n                        )));\n            \n                $this->set(compact('reverses'));\n                $this->layout = null;\n                $this->autoLayout = false;\n                Configure::write('debug', '0');\n        }\n        \n	public function correction($id = null) {\n            $this->Reverse->id = $id;\n		if ($this->request->is('post')) {\n			//$this->Upload->create();\n			//if ($this->Upload->save($this->request->data)) {\n                            //$this->request->data['Upload']['reverse_id'] = $this->Upload->Reverse->getInsertID() + 1;\n                            //$this->request->data['Upload']['reverse_id'] = $this->Upload->Reverse->id;\n                           // $this->Upload->set('reverse_id', '$this->Upload->Reverse->id');\n                           // $this->Upload->Reverse->set('status_id', 11);\n				//$this->Session->setFlash(__('The upload has been saved.'));\n				//return $this->redirect(array('controller' => 'Reverses' ,'action' => 'view', $this->Upload->Reverse->id));\n			//} else {\n				//$this->Session->setFlash(__('The upload could not be saved. Please, try again.'));\n			//}\n			try {\n                $this->request->data['Reverse']['reverse_id'] = $this->Reverse->id;\n                $this->request->data['Reverse']['status_id'] = '11';\n				$this->Reverse->createWithAttachments($this->request->data);\n                                //$this->Upload->Reverse->saveAll($this->request->data);\n				$this->Session->setFlash(__('Correção enviada com sucesso'));\n                                return $this->redirect(array('controller' => 'Reverses' ,'action' => 'view', $this->Reverse->id));\n			} catch (Exception $e) {\n				$this->Session->setFlash($e->getMessage());\n			}\n		}\n		$types = $this->Reverse->Upload->Type->find('list');\n		$reverses = $this->Reverse->Upload->find('list');\n		$this->set(compact('types', 'reverses'));\n	}\n\n\n\n        public function report(){\n                            \n                                 }\n        \n        public function export(){\n                $dataDe = $this->request->data['Reverse']['from'];\n                $dataAte = $this->request->data['Reverse']['to'];\n                $reverse = $this->paginate = array(\n                    'conditions' => array(\n                       // 'AND' => array(\n                                'AND' => array(\n                                    //'Reverse.status_id' => $statusColeta,\n                                    //'Reverse.user_id' => $userId,\n                                    \n                                ),\n                                'OR' => array(\n                                    \n                                    'Reverse.created BETWEEN ? AND ? ' => array($dataDe, $dataAte),\n                                       \n                                )\n                            //)\n                        ),\n                    'limit' => '2000'\n                ); \n                $reverses = $this->paginate('Reverse');\n                //$this->set(compact('reverses'));\n\n               // $reverses = $this->Reverse->find('all');\n                $_serialize = 'reverses';\n                $_delimiter = ';';\n                $_header = array('Numero da Coleta', 'Numero NF Posto', 'Serie NF', 'Volume', 'Valor NF', 'Nome do Usuario', 'Nome do Posto', 'Status', 'Centro de Custo', 'Numero de SO', 'Data Solicitacao', 'Data Aprovacao', 'Observacao', 'NF de Origem', 'Modelo');\n                $_extract = array('Reverse.id', 'Reverse.invoice', 'Reverse.serie', 'Reverse.quantity', 'Reverse.amount', 'User.name', 'User.username', 'Status.name', 'Cost.name', 'Reverse.so', 'Reverse.created', 'Reverse.modified', 'Reverse.observation', 'Reverse.reverse', 'ReversesProduct.material');\n\n                $this->viewClass = 'CsvView.Csv';\n                $this->set(compact('reverses', '_serialize', '_header', '_extract', '_delimiter'));\n\n		//$this->Export->exportCsv($reverses, 'reverses'.date('Y-m-d H:i:s').'.csv');\n        }\n\n    public function gchart(){\n        \n    }        \n\n    public function chart() {\n        //$options = array('conditions' => array('User.' . $this->User->primaryKey => $id));\n            $dataDe = $this->request->data['Reverse']['from'];\n            $dataAte = $this->request->data['Reverse']['to'];\n\n            //$this->Userid = $id;\n            $reverses = $this->Reverse->find('all', \n                    array(\n                        'conditions' => array(\n                            'Reverse.created BETWEEN ? AND ? ' => array($dataDe, $dataAte),\n                        ),\n                        'order' => array('Reverse.created' => 'ASC'),\n                        'group' => array('Reverse.status_id'),\n                        'fields' => array(\n                            'Status.name',\n                            'Count(Reverse.status_id) as Total',\n                            'Reverse.status_id',\n                            'Reverse.created',\n                        )\n                    )\n                    );\n            \n            $charts = new GoogleChart();\n            \n            $charts->type('PieChart');\n            $charts->options(array('title' => 'Coletas Reversas', 'width' => '640', 'height' => '480', 'isStacked' => 'true'));\n            $charts->columns(array(\n                'status_id' => array(\n                    'type' => 'string',\n                    'label' => 'status_id'\n                ),\n                'Total' => array(\n                    'type' => 'number',\n                    'label' => 'Total'\n                )\n            )); \n            \n            \n            \n           foreach($reverses as $row){\n                    $charts->addRow(array('status_id' => $row['Status']['name'], 'Total' => $row['0']['Total']));\n            }\n           // $charts->addRow(array('condition_id' => 'Brazil', 'Total' => '1900'));\n\n            $charts->div('chart_div');\n             \n            //$total = $this->Reverse->find('all', \n                    //array(\n                       // 'conditions' => array(\n                            //'Reverse.user_id' => $this->Userid,\n                        //),\n                    //)\n                   // );\n                \n                //$this->set('user', $this->User->find('first', $options));\n                $this->set(compact('charts'));\n    }\n\n    public function reverses(){\n\n        $reverses = $this->Reverse->find('all', \n                        array(\n                            'conditions' => array(\n                                'Reverse.status_id' => 1,\n                            ),\n                            //'order' => array('Reverse.created' => 'ASC'),\n                            //'group' => array('Reverse.status_id'),\n                            //'fields' => array(\n                            //    'Reverse.id',\n                            //    'User.name',\n                            //    'User.email',\n                            //    'Count(Reverse.user_id) as Total',\n                            //    'Reverse.status_id',\n                            )\n                        //)\n                    );\n\n        foreach ($reverses as $row) {\n          // $rev = $row['Reverse']['id'];\n\n           $Email = new CakeEmail('smtp');\n           $Email->To($row['User']['email']);\n           $Email->subject('Coletas Pendentes - Envision');\n           $Email->template('coletas', 'coletas_layout');\n           $Email->emailFormat('html');\n\n           $Email->viewVars(array(\n                'nome' => $row['User']['name'],\n                'reverse' => $row['Reverse']['id'],\n                //'total' => Total,\n            ));\n\n           $resultado = $Email->send();\n        }\n\n        \n\n        \n\n\n\n        $this->set(compact('reverses'));\n\n        //Debugger::dump($reverses);\n    }\n\n\n}\n",
+			"file": "app/Controller/ReversesController.php",
+			"file_size": 41799,
+			"file_write_time": 1434653985000000,
 			"settings":
 			{
-				"buffer_size": 2309,
+				"buffer_size": 41346,
 				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "    public function index() {\n            \n                $this->roleId = $this->Session->read('Auth.User.group_id'); \n                $this->userId = $this->Session->read('Auth.User.id');\n                $this->carrieruserId = $this->Session->read('Auth.User.carrier_id');  \n        //$this->Reverse->recursive = 0;\n        //$this->set('reverses', $this->Paginator->paginate());\n                $statusColeta = $this->request->data['Reverse']['status_id'];\n                $userColeta = $this->request->data['Reverse']['user'];\n                $dataDe = $this->request->data['Reverse']['from'];\n                $dataAte = $this->request->data['Reverse']['to'];\n                //$numNF = $this->request->data['Reverse']['nota'];\n                \n                if($this->roleId == '1'){\n                    //$this->Reverse->recursive = 0;\n                    //$this->paginate = array('limit' => '1000');\n                    //$reverses = $this->paginate('Reverse');\n                    //$this->set(compact('reverses'));\n\n                    //$dadosReversa = $this->Reverse->User->read(null, array('User.username' => $userColeta));\n                    $dadosReversa = $this->Reverse->User->findAllByEmailOrUsername(NULL, $userColeta);\n                    $userId =  $dadosReversa[0]['User']['id'];\n                    \n              if($userId == NULL AND $statusColeta == NULL){       \n                  \n                $this->paginate = array(\n                    'conditions' => array(\n                       // 'AND' => array(\n                                'AND' => array(\n                                    //'Reverse.status_id' => $statusColeta,\n                                    //'Reverse.user_id' => $userId,\n                                    \n                                ),\n                                'OR' => array(\n                                    \n                                    'Reverse.created BETWEEN ? AND ? ' => array($dataDe, $dataAte),\n                                       \n                                )\n                            //)\n                        ),\n                    'limit' => '1000'\n                ); \n                $reverses = $this->paginate('Reverse');\n                $this->set(compact('reverses'));\n                \n              }else if($userId != NULL AND $statusColeta == NULL){\n                   \n                $this->paginate = array(\n                    'conditions' => array(\n                       // 'AND' => array(\n                                'AND' => array(\n                                    //'Reverse.status_id' => $statusColeta,\n                                    'Reverse.user_id' => $userId,\n                                    \n                                ),\n                                'OR' => array(\n                                    \n                                    'Reverse.created BETWEEN ? AND ? ' => array($dataDe, $dataAte),\n                                       \n                                )\n                            //)\n                        ),\n                    'limit' => '1000'\n                );\n                    $reverses = $this->paginate('Reverse');\n                    $this->set(compact('reverses'));\n                    \n              }else if($userId != NULL AND $statusColeta != NULL){\n                  \n                $this->paginate = array(\n                    'conditions' => array(\n                       // 'AND' => array(\n                                'AND' => array(\n                                    'Reverse.status_id' => $statusColeta,\n                                    'Reverse.user_id' => $userId,\n                                    \n                                ),\n                                'OR' => array(\n                                    \n                                    'Reverse.created BETWEEN ? AND ? ' => array($dataDe, $dataAte),\n                                       \n                                )\n                            //)\n                        ),\n                    'limit' => '1000'\n                );\n                    $reverses = $this->paginate('Reverse');\n                    $this->set(compact('reverses'));\n                    \n              }else if($userId == NULL AND $statusColeta != NULL){\n                  \n                $this->paginate = array(\n                    'conditions' => array(\n                       'AND' => array(\n                                'AND' => array(\n                                    'Reverse.status_id' => $statusColeta,\n                                    //'Reverse.user_id' => $userId,\n                                    \n                                ),\n                                'OR' => array(\n                                    \n                                    'Reverse.created BETWEEN ? AND ? ' => array($dataDe, $dataAte),\n                                       \n                                )\n                            )\n                        ),\n                    'limit' => '1000'\n                );\n                    $reverses = $this->paginate('Reverse');\n                    $this->set(compact('reverses'));\n                    \n              }\n                }else if($this->roleId == '3'){\n                \n                $this->paginate = array(\n                    'conditions' => array(\n                        'OR' => array(\n                                'AND' => array(\n                                    'Status.visibility_groups' => '',\n                                    'Status.visibility_groups LIKE' => '%\"' . $this->roleId . '\"%',\n                                ),\n                                'AND' => array(\n                                    'Reverse.user_id' => $this->userId,\n                                )\n                            )\n                        ),\n                    'limit' => '1000'\n                );\n                    $reverses = $this->paginate('Reverse');\n                    $this->set(compact('reverses'));\n                }else if($this->roleId == '2'){\n                    \n                $this->paginate = array(\n                    'conditions' => array(\n                        'AND' => array(\n                        'AND' => array(\n                               'Reverse.status_id' => $statusColeta, \n                            ),\n                        'OR' => array(\n                            'Status.visibility_groups' => '',\n                            'Status.visibility_groups LIKE' => '%\"' . $this->roleId . '\"%',\n                            )\n                        )\n                        ),\n                    'limit' => '1000'\n                );\n                    $reverses = $this->paginate('Reverse');\n                    $this->set(compact('reverses'));\n\n                }else if($this->roleId == '4'){\n\n                $this->Reverse->recursive = 1;   \n                $reverses = $this->Reverse->find('all', array(\n                    'conditions' => array(\n                        'AND' => array(\n                            'AND' => array(\n                                'Reverse.status_id' => $statusColeta, \n                            ),\n                            'OR' => array(\n                                'Reverse.status_id' => '10', \n                                'Status.visibility_groups LIKE' => '%\"' . $this->roleId . '\"%',\n                                'Reverse.carrier_id =' => $this->carrieruserId\n                            )\n                        )\n                    ),\n                    'limit' => '1000'\n                )\n                );\n                   // $reverses = $this->paginate('Reverse');\n                    $this->set(compact('reverses'));\n                    //   Debugger::dump($reverses);\n                }    \n    }",
+			"settings":
+			{
+				"buffer_size": 7878,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "app/View/Reverses/index.ctp",
+			"settings":
+			{
+				"buffer_size": 5251,
+				"line_ending": "Windows"
 			}
 		}
 	],
@@ -72,12 +99,17 @@
 	},
 	"file_history":
 	[
+		"/var/www/html/logistica/app/Controller/AppController.php",
+		"/var/www/html/logistica/app/Config/email.php",
+		"/var/www/html/logistica/app/Controller/CollectionsController.php",
+		"/var/www/html/logistica/app/View/Collections/add.ctp",
+		"/var/www/html/logistica/app/View/Collections/index.ctp",
+		"/var/www/html/logistica/app/View/Elements/pag.ctp",
 		"/var/www/html/logistica/app/Controller/ReversesController.php",
 		"/var/www/html/logistica/app/Controller/ProductsController.php",
 		"/var/www/html/logistica/app/webroot/js/validanf.js",
 		"/var/www/html/logistica/app/Model/Collection.php",
 		"/var/www/html/logistica/app/Config/core.php",
-		"/var/www/html/logistica/app/View/Collections/index.ctp",
 		"/var/www/html/logistica/app/View/Collections/validar_n_f.ctp",
 		"/var/www/html/logistica/app/View/Collections/view.ctp",
 		"/var/www/html/logistica/app/View/Reverses/validar_n_f.ctp",
@@ -152,23 +184,353 @@
 	"groups":
 	[
 		{
-			"selected": 2,
+			"selected": 3,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "app/Controller/CollectionsController.php",
+					"file": "app/View/Reverses/search.ctp",
 					"settings":
 					{
-						"buffer_size": 5151,
+						"buffer_size": 4058,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1291,
-								1291
+								2149,
+								2149
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"bh_regions":
+							[
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": "warning",
+								"box-model": true,
+								"box-sizing": "warning",
+								"compatible-vendor-prefixes": "warning",
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": "warning",
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": "warning",
+								"overqualified-elements": "warning",
+								"qualified-headings": "warning",
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"star-property-hack": "warning",
+								"text-indent": "warning",
+								"underscore-property-hack": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": true,
+								"zero-units": "warning"
+							},
+							"gjslint_ignore":
+							[
+								110
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"browser": true,
+								"devel": true,
+								"evil": true,
+								"regexdash": true,
+								"sub": true,
+								"trailing": true,
+								"wsh": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": "load-save",
+							"sublimelinter_delay": 2,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": true,
+							"sublimelinter_gutter_marks_theme": "simple",
+							"sublimelinter_mark_style": "none",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/HTML/HTML.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 171.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "app/webroot/js/forms.js",
+					"settings":
+					{
+						"buffer_size": 71,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								69,
+								69
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"bh_regions":
+							[
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": "warning",
+								"box-model": true,
+								"box-sizing": "warning",
+								"compatible-vendor-prefixes": "warning",
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": "warning",
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": "warning",
+								"overqualified-elements": "warning",
+								"qualified-headings": "warning",
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"star-property-hack": "warning",
+								"text-indent": "warning",
+								"underscore-property-hack": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": true,
+								"zero-units": "warning"
+							},
+							"gjslint_ignore":
+							[
+								110
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"browser": true,
+								"devel": true,
+								"evil": true,
+								"regexdash": true,
+								"sub": true,
+								"trailing": true,
+								"wsh": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": "load-save",
+							"sublimelinter_delay": 2,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": true,
+							"sublimelinter_gutter_marks_theme": "simple",
+							"sublimelinter_mark_style": "none",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "app/Config/core.php",
+					"settings":
+					{
+						"buffer_size": 14538,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1201,
+								1201
 							]
 						],
 						"settings":
@@ -315,190 +677,25 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 810.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "app/View/Collections/add.ctp",
-					"settings":
-					{
-						"buffer_size": 477,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								134,
-								134
-							]
-						],
-						"settings":
-						{
-							"BracketHighlighterBusy": false,
-							"annotations":
-							[
-								"TODO",
-								"README",
-								"FIXME"
-							],
-							"bh_regions":
-							[
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close"
-							],
-							"csslint_options":
-							{
-								"adjoining-classes": "warning",
-								"box-model": true,
-								"box-sizing": "warning",
-								"compatible-vendor-prefixes": "warning",
-								"display-property-grouping": true,
-								"duplicate-background-images": "warning",
-								"duplicate-properties": true,
-								"empty-rules": true,
-								"errors": true,
-								"fallback-colors": "warning",
-								"floats": "warning",
-								"font-faces": "warning",
-								"font-sizes": "warning",
-								"gradients": "warning",
-								"ids": "warning",
-								"import": "warning",
-								"important": "warning",
-								"known-properties": true,
-								"outline-none": "warning",
-								"overqualified-elements": "warning",
-								"qualified-headings": "warning",
-								"regex-selectors": "warning",
-								"rules-count": "warning",
-								"shorthand": "warning",
-								"star-property-hack": "warning",
-								"text-indent": "warning",
-								"underscore-property-hack": "warning",
-								"unique-headings": "warning",
-								"universal-selector": "warning",
-								"vendor-prefix": true,
-								"zero-units": "warning"
-							},
-							"gjslint_ignore":
-							[
-								110
-							],
-							"gjslint_options":
-							[
-							],
-							"javascript_linter": "jshint",
-							"jshint_options":
-							{
-								"browser": true,
-								"devel": true,
-								"evil": true,
-								"regexdash": true,
-								"sub": true,
-								"trailing": true,
-								"wsh": true
-							},
-							"pep8": true,
-							"pep8_ignore":
-							[
-								"E501"
-							],
-							"perl_linter": "perlcritic",
-							"pyflakes_ignore":
-							[
-							],
-							"pyflakes_ignore_import_*": true,
-							"sublimelinter": "load-save",
-							"sublimelinter_delay": 2,
-							"sublimelinter_disable":
-							[
-							],
-							"sublimelinter_executable_map":
-							{
-							},
-							"sublimelinter_fill_outlines": false,
-							"sublimelinter_gutter_marks": true,
-							"sublimelinter_gutter_marks_theme": "simple",
-							"sublimelinter_mark_style": "none",
-							"sublimelinter_notes": false,
-							"sublimelinter_objj_check_ascii": false,
-							"sublimelinter_popup_errors_on_save": false,
-							"sublimelinter_syntax_map":
-							{
-								"C++": "c",
-								"Python Django": "python",
-								"Ruby on Rails": "ruby"
-							},
-							"sublimelinter_wrap_find": true,
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "app/View/Collections/index.ctp",
+					"buffer": 3,
+					"file": "app/Controller/ReversesController.php",
 					"settings":
 					{
-						"buffer_size": 2309,
+						"buffer_size": 41346,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2184,
-								2184
+								3046,
+								3046
 							]
 						],
 						"settings":
@@ -641,11 +838,251 @@
 								"Ruby on Rails": "ruby"
 							},
 							"sublimelinter_wrap_find": true,
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"translate_tabs_to_spaces": false
+							"syntax": "Packages/PHP/PHP.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 51.0,
+						"translation.y": 1140.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"settings":
+					{
+						"buffer_size": 7878,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								790,
+								790
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close"
+							],
+							"syntax": "Packages/PHP/PHP.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 399.0,
+						"translation.y": 114.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "app/View/Reverses/index.ctp",
+					"settings":
+					{
+						"buffer_size": 5251,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								401,
+								401
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"bh_regions":
+							[
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": "warning",
+								"box-model": true,
+								"box-sizing": "warning",
+								"compatible-vendor-prefixes": "warning",
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": "warning",
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": "warning",
+								"overqualified-elements": "warning",
+								"qualified-headings": "warning",
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"star-property-hack": "warning",
+								"text-indent": "warning",
+								"underscore-property-hack": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": true,
+								"zero-units": "warning"
+							},
+							"gjslint_ignore":
+							[
+								110
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"browser": true,
+								"devel": true,
+								"evil": true,
+								"regexdash": true,
+								"sub": true,
+								"trailing": true,
+								"wsh": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": "load-save",
+							"sublimelinter_delay": 2,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": true,
+							"sublimelinter_gutter_marks_theme": "simple",
+							"sublimelinter_mark_style": "none",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/HTML/HTML.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
